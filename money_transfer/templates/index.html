@@ -1,0 +1,139 @@
+highlight">
+                    <span>Recipient Gets:</span>
+                    <span id="receiving-amount">0 CFA</span>
+                </div>
+
+                <div class="actions">
+                    <button id="proceed-btn" class="primary">Proceed with Payment</button>
+                    <button id="cancel-btn" class="secondary">Cancel</button>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-clock"></i>
+                    <span>Instant Transfer</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure Payment</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-percentage"></i>
+                    <span>Low Fees</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Money Transfer</title>
+Expand
+message.txt
+3 KB
+[8:59 PM]
+:root {
+    --primary-color: #4a6bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+Expand
+message.txt
+4 KB
+
+Utrains Team — 5/6/2025 9:04 PM
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const calculateBtn = document.getElementById('calculate-btn');
+    const resultsDiv = document.getElementById('results');
+    const proceedBtn = document.getElementById('proceed-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    calculateBtn.addEventListener('click', calculateTransfer);
+    proceedBtn.addEventListener('click', proceedPayment);
+    cancelBtn.addEventListener('click', cancelTransfer);
+
+    function calculateTransfer() {
+        const amount = parseFloat(amountInput.value);
+
+        if (isNaN(amount) || amount <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+
+        fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: amount=${amount}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('fee-amount').textContent = data.fee_amount;
+                document.getElementById('total-amount').textContent = data.amount_plus_fees;
+                document.getElementById('receiving-amount').textContent = data.receiving_amount;
+                resultsDiv.style.display = 'block';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    }
+
+    function proceedPayment() {
+        alert('Redirecting to payment gateway...');
+        // In a real app, you would redirect to a payment page
+    }
+
+    function cancelTransfer() {
+        amountInput.value = '';
+        resultsDiv.style.display = 'none';
+    }
+});
+[9:08 PM]
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(name)
+
+Configuration,
+SENDING_FEES = 0.02
+EXCHANGE_RATE = 655
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    try:
+        user_amount = float(request.form['amount'])
+
+Calculations,
+        fee_amount = SENDING_FEES * user_amount
+        amount_plus_fees = user_amount + fee_amount
+        receiving_amount = EXCHANGE_RATE * user_amount
+
+        return jsonify({
+            'success': True,
+            'amount_plus_fees': f"${amount_plus_fees:,.2f}",
+            'receiving_amount': f"{receiving_amount:,.2f} CFA",
+            'fee_amount': f"${fee_amount:,.2f}"
+        })
+    except:
+        return jsonify({'success': False, 'message': 'Please enter a valid amount'})
+
+if name == 'main':
+    app.run(debug=True)
